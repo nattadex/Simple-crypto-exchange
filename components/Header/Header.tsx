@@ -1,19 +1,16 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import styles from './Header.module.css'
 
+export default function Header() {
+  return (
+    <>
+      <h1 className={styles.title}>
+        La Coco Crypto Exchange
+      </h1>
+      <div className={styles.currDateTime}>
+        {new Date().toLocaleString() + ""}
+      </div>
 
-const Header = () => {
-    
-    return (
-        <>
-            <h1 className={styles.title}>
-                La Coco Crypto Exchange
-            </h1>
-            
-            {new Date().toLocaleString() + ""}
-        </>
-
-    )
+    </>
+  )
 }
-
-export default Header

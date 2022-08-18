@@ -1,54 +1,97 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import styles from './Exchange.module.css'
 
-interface CryptoInfo {
+import CurrencyRow from '../CurrencyRow/CurrencyRow'
 
+const API_URL = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin%2Cethereum%2Ctether%2Cdefichain%2Cdogecoin&vs_currencies=usd"
+
+interface Rate {
+    id?: string;
+    usdAmt?: number;
 }
-const Exchange = () => {
-    const [currToUsd, setCurrToUsd] = useState({})
 
-    useEffect(() =>{
-        fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin%2Cethereum%2Ctether%2Cdefichain%2Cdogecoin&vs_currencies=usd")
-        .then(res => res.json())
-        .then((data) =>{
-            setCurrToUsd(data)
-            console.log(currToUsd)
-        })
-        .catch(ex => {
-            const error =
-          ex.response.status === 404
-            ? "Resource Not found"
-            : "An unexpected error has occurred";
-        })
+export default function Exchange() {
+    const [currToUsd, setCurrToUsd] = useState<(string|number)[][]>([])
+    const [fromCurr, setFromCurr] = useState<string>()
+    const [toCurr, setToCurr] = useState<string>()
+    const [exchangeRate, setExchangeRate] = useState<number>()
+    const [amount, setAmount] = useState(1)
+    const [amountInFromCurr, setAmountInFromCurr] = useState(true)
+
+    let toAmount, fromAmount: number
+
+    if (amountInFromCurr) {
+        fromAmount = amount
+        toAmount = amount * exchangeRate
+    } else {
+        toAmount = amount
+        fromAmount = amount / exchangeRate
+    }
+
+    useEffect(() => {
+        fetch(API_URL)
+            .then(res => res.json())
+            .then((data) => {
+                let rates: (string | number)[][] = []
+                Object.entries(data).forEach(([key]) => {
+                    rates.push([key, data[key]["usd"]])
+
+                });
+                setCurrToUsd(rates)
+                setFromCurr(rates[0][0])
+                setToCurr(rates[1][0])
+                setExchangeRate(rates[0][1] / rates[1][1])
+            })
+            .catch(ex => {
+                const error =
+                    ex.response.status === 404
+                        ? "Resource Not found"
+                        : "An unexpected error has occurred";
+            })
     }, [])
 
-    console.log(currToUsd)
-    return(
+    useEffect(() => {
+        if (fromCurr != null && toCurr != null) {
+            let from: (string | number)[] | undefined = currToUsd.find(o => o[0] === fromCurr)
+            let to: (string | number)[] | undefined = currToUsd.find(o => o[0] === toCurr)
+            if (from != undefined && to != undefined) {
+                setExchangeRate(from[1] / to[1])
+            }
+
+        }
+    }, [fromCurr, toCurr])
+
+    function handleFromAmtChange(e: { target: { value: React.SetStateAction<number>; }; }) {
+        setAmount(e.target.value)
+        setAmountInFromCurr(true)
+    }
+
+    function handleToAmtChange(e: { target: { value: React.SetStateAction<number>; }; }) {
+        setAmount(e.target.value)
+        setAmountInFromCurr(false)
+    }
+
+    return (
         <>
             <h5>Choose the currency and the amount to get the exchange rate.</h5>
             <div className="currency-form">
-                <label htmlFor="input1">You Have:</label>
-                <input name='input1'></input>
-                <select>
-                    <option value="bitcoin">BTC</option>
-                    <option value="ethereum">ETH</option>
-                    <option value="bitcoin">USDT</option>
-                    <option value="ethereum">DFI</option>
-                    <option value="ethereum">DOGE</option>
-                </select>
-                <label htmlFor="input2">You Get:</label>
-                <input name='input2'></input>
-                <select>
-                    <option value="bitcoin">BTC</option>
-                    <option value="ethereum">ETH</option>
-                    <option value="bitcoin">USDT</option>
-                    <option value="ethereum">DFI</option>
-                    <option value="ethereum">DOGE</option>
-                </select>
+                <CurrencyRow
+                    currencyOptions={currToUsd}
+                    selectedCurr={fromCurr}
+                    onChangeCurr={(e: { target: { value: React.SetStateAction<string | undefined>; }; }) => setFromCurr(e.target.value)}
+                    onChangeAmount={handleFromAmtChange}
+                    amount={fromAmount}
+                />
+                <div className={styles.equal}>=</div>
+                <CurrencyRow
+                    currencyOptions={currToUsd}
+                    selectedCurr={toCurr}
+                    onChangeCurr={(e: { target: { value: React.SetStateAction<string | undefined>; }; }) => setToCurr(e.target.value)}
+                    onChangeAmount={handleToAmtChange}
+                    amount={toAmount}
+                />
             </div>
-            
+
         </>
     )
 }
-
-export default Exchange;
