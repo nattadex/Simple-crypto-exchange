@@ -8,7 +8,7 @@ export default function Header() {
         La Coco Crypto Exchange
       </h1>
       <div className={styles.currDateTime}>
-        {new Date().toLocaleString() + ""}
+        <b>Data last refreshed:</b> {new Date().toLocaleString() + ""}
       </div>
 
     </>

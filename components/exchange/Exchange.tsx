@@ -12,8 +12,8 @@ interface Rate {
 
 export default function Exchange() {
     const [currToUsd, setCurrToUsd] = useState<(string|number)[][]>([])
-    const [fromCurr, setFromCurr] = useState<string>()
-    const [toCurr, setToCurr] = useState<string>()
+    const [fromCurr, setFromCurr] = useState<string>("")
+    const [toCurr, setToCurr] = useState<string>("")
     const [exchangeRate, setExchangeRate] = useState<number>(1)
     const [amount, setAmount] = useState(1)
     const [amountInFromCurr, setAmountInFromCurr] = useState(true)
