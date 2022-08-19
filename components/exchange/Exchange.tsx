@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import styles from './Exchange.module.css'
 
 import CurrencyRow from '../CurrencyRow/CurrencyRow'
@@ -14,9 +14,10 @@ export default function Exchange() {
     const [currToUsd, setCurrToUsd] = useState<(string|number)[][]>([])
     const [fromCurr, setFromCurr] = useState<string>()
     const [toCurr, setToCurr] = useState<string>()
-    const [exchangeRate, setExchangeRate] = useState<number>()
+    const [exchangeRate, setExchangeRate] = useState<number>(1)
     const [amount, setAmount] = useState(1)
     const [amountInFromCurr, setAmountInFromCurr] = useState(true)
+
 
     let toAmount, fromAmount: number
 
@@ -50,6 +51,7 @@ export default function Exchange() {
             })
     }, [])
 
+    
     useEffect(() => {
         if (fromCurr != null && toCurr != null) {
             let from: (string | number)[] | undefined = currToUsd.find(o => o[0] === fromCurr)
@@ -78,7 +80,12 @@ export default function Exchange() {
                 <CurrencyRow
                     currencyOptions={currToUsd}
                     selectedCurr={fromCurr}
-                    onChangeCurr={(e: { target: { value: React.SetStateAction<string | undefined>; }; }) => setFromCurr(e.target.value)}
+                    onChangeCurr={(e: { target: { value: React.SetStateAction<string | undefined>; }; }) => {
+                        if(toCurr != e.target.value){
+                            setFromCurr(e.target.value)
+                        }
+                        
+                    }}
                     onChangeAmount={handleFromAmtChange}
                     amount={fromAmount}
                 />
@@ -86,7 +93,11 @@ export default function Exchange() {
                 <CurrencyRow
                     currencyOptions={currToUsd}
                     selectedCurr={toCurr}
-                    onChangeCurr={(e: { target: { value: React.SetStateAction<string | undefined>; }; }) => setToCurr(e.target.value)}
+                    onChangeCurr={(e: { target: { value: React.SetStateAction<string | undefined>; }; }) => {
+                        if(fromCurr != e.target.value){
+                            setToCurr(e.target.value)
+                        }
+                    }}
                     onChangeAmount={handleToAmtChange}
                     amount={toAmount}
                 />
